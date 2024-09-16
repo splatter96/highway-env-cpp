@@ -133,6 +133,25 @@ public:
                 );
 
     }
+
+    std::vector<LaneIndex> side_lanes(LaneIndex lane_index){
+        /*
+         Get all lanes parallel to lane_index
+        :param lane_index: the index of a lane.
+        :return: indexes of lanes next to a an input lane, to its right or left.
+        */
+        std::string _from;
+        std::string _to;
+        int _id;
+        std::tie(_from, _to, _id) = lane_index;
+
+        std::vector<LaneIndex> lanes;
+        if(_id > 0)
+            lanes.push_back(LaneIndex(_from, _to, _id - 1));
+        if( _id < this->graph[_from][_to].size() - 1)
+            lanes.push_back(LaneIndex(_from, _to, _id + 1));
+        return lanes;
+    }
 };
 
 #endif // ROAD_H

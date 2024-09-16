@@ -94,4 +94,7 @@ def _make_road() -> None:
     dist = net.get_closest_lane_index(np.array([240,0]), 0.4)
     print(dist)
 
+    print(net.side_lanes(next_lane))
+    print(net.side_lanes(next_lane))
+
 _make_road()

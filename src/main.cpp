@@ -52,5 +52,6 @@ PYBIND11_MODULE(python_example, m)
         .def("add_sine_lane", &RoadNetwork::add_sine_lane)
         .def("get_lane", &RoadNetwork::get_lane)
         .def("get_closest_lane_index", &RoadNetwork::get_closest_lane_index)
-        .def("next_lane", &RoadNetwork::next_lane);
+        .def("next_lane", &RoadNetwork::next_lane)
+        .def("side_lanes", &RoadNetwork::side_lanes);
 }
