@@ -48,10 +48,8 @@ PYBIND11_MODULE(python_example, m)
 
     py::class_<RoadNetwork>(m, "RoadNetwork")
         .def(py::init<>())
-        .def("get", &RoadNetwork::get)
         .def("add_straight_lane", &RoadNetwork::add_straight_lane)
         .def("add_sine_lane", &RoadNetwork::add_sine_lane)
-        .def("get_lane", &RoadNetwork::get_lane2);
-        //.def("add_lane", &RoadNetwork::add_lane);
-        //.def("get_lane", &RoadNetwork::get_lane);
+        .def("get_lane", &RoadNetwork::get_lane)
+        .def("next_lane", &RoadNetwork::next_lane);
 }

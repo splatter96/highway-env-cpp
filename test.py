@@ -9,19 +9,18 @@ end = np.array([90, 20])
 linetypes = [python_example.LineType.CONTINUOUS, python_example.LineType. CONTINUOUS]
 
 lane = python_example.StraightLane(start, end, 4., linetypes, False)
-print(lane)
 lane = python_example.StraightLane(start, end, 4., linetypes)
 
-print(lane)
+# print(lane)
 
-print(lane.length)
-print(lane.start)
-print(lane.end)
+# print(lane.length)
+# print(lane.start)
+# print(lane.end)
 
-print(lane.heading_at(25))
-print(lane.width_at(25))
+# print(lane.heading_at(25))
+# print(lane.width_at(25))
 
-print(lane.local_coordinates(np.array([15, 25])))
+# print(lane.local_coordinates(np.array([15, 25])))
 
 def _make_road() -> None:
     """
@@ -80,8 +79,13 @@ def _make_road() -> None:
     # self.road = road
 
     # net.get_lane(("j", "k", 0))
-    print(net.get_lane("a", "b", 0).length)
-    print(net.get_lane("a", "b", 0))
-    print(net.get_lane("a", "b", 0).start)
+    # print(net.get_lane(("a", "b", 0)).length)
+    # print(net.get_lane(("a", "b", 0)))
+    # print(net.get_lane(("a", "b", 0)).start)
+    # print(net.get_lane(("a", "b", 0)).end)
+
+    next_lane = net.next_lane(("a", "b", 0), np.array([0,0]))
+    print(next_lane)
+    print(net.get_lane(next_lane).start)
 
 _make_road()

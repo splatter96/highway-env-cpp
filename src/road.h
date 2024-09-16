@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <algorithm>
 
 #include <Eigen/Dense>
 //#include <pybind11/eigen.h>
@@ -26,41 +27,15 @@ public:
     std::vector<AbstractLane> lanes;
     std::map<std::string, std::map<std::string, std::vector<std::unique_ptr<AbstractLane>>>> graph;
 
-    std::vector<std::unique_ptr<AbstractLane>> my_road;
-
     RoadNetwork(){ };
-
-
-    template <typename TLane>
-    void set(TLane const& lane){
-        this->my_road.push_back(std::make_unique<TLane>(lane));
-    }
 
     void add_straight_lane(std::string _from, std::string _to, StraightLane lane){
         this->graph[_from][_to].push_back(std::move(std::make_unique<StraightLane>(lane)));
     }
 
-    //void add_straight_lane(StraightLane lane){
-        //this->my_road.push_back(std::move(std::make_unique<StraightLane>(lane)));
-    //}
-
-
-    void add_sine_lane(SineLane lane){
-        this->my_road.push_back(std::move(std::make_unique<SineLane>(lane)));
+    void add_sine_lane(std::string _from, std::string _to, SineLane lane){
+        this->graph[_from][_to].push_back(std::move(std::make_unique<SineLane>(lane)));
     }
-
-
-    std::unique_ptr<AbstractLane> get(int i){
-        std::cout <<"FROM CPP:  " << std::endl;
-        std::cout <<"cPP:  " << my_road[i]->length << std::endl;
-        return std::move(this->my_road[i]->clone());
-    }
-
-    // TODO implement catch for missing LaneIndex
-    std::unique_ptr<AbstractLane> get_lane2(std::string _from, std::string _to, int num){
-        return std::move(this->graph[_from][_to][num]->clone());
-    }
-
 
     template <typename TLane>
     void add_lane(std::string _from, std::string _to, TLane const& lane){
@@ -71,16 +46,12 @@ public:
         :param _to: the node at which the lane ends.
         :param AbstractLane lane: the lane geometry.
         */
-        //if _from not in this->graph:
-            //this->graph[_from] = {}
-        //if _to not in this->graph[_from]:
-            //this->graph[_from][_to] = []
 
         this->graph[_from][_to].push_back(std::make_unique<TLane>(lane));
-        //this->graph[_from][_to].push_back(std::unique_ptr<AbstractLane>(lane));
     }
 
 
+    // TODO implement catch for missing LaneIndex
     std::unique_ptr<AbstractLane> get_lane(LaneIndex index){
         /*
         Get the lane geometry corresponding to a given index in the road network.
@@ -88,20 +59,14 @@ public:
         :param index: a tuple (origin node, destination node, lane id on the road).
         :return: the corresponding lane geometry.
         */
-        //_from, _to, _id = index
         std::string _from;
         std::string _to;
         int _id;
         std::tie(_from, _to, _id) = index;
 
-        //if _id is None and len(self.graph[_from][_to]) == 1:
-            //_id = 0
-
-        //return std::unique_ptr<AbstractLane>(this->graph[_from][_to][_id]);
-        return std::move(this->graph[_from][_to][_id]);
+        return std::move(this->graph[_from][_to][_id]->clone());
     }
 
-};
 
     //def get_closest_lane_index(self, position: np.ndarray, heading: Optional[float] = None) -> LaneIndex:
         //"""
@@ -140,45 +105,33 @@ public:
 
         //return closest_lane_index
 
-    //def next_lane(self, current_index: LaneIndex, route: Route = None, position: np.ndarray = None,
-                  //np_random: np.random.RandomState = np.random) -> LaneIndex:
-        //"""
-        //Get the index of the next lane that should be followed after finishing the current lane.
+    LaneIndex next_lane(LaneIndex current_index, Vector position){
+        /*
+        Get the index of the next lane that should be followed after finishing the current lane.
 
-        //- If a plan is available and matches with current lane, follow it.
-        //- Else, pick closest next road
-        //- If it has the same number of lanes as current road, stay in the same lane.
-        //- Else, pick next road's closest lane.
-        //:param current_index: the index of the current lane.
-        //:param route: the planned route, if any.
-        //:param position: the vehicle position.
-        //:param np_random: a source of randomness.
-        //:return: the index of the next lane to be followed when current lane is finished.
-        //"""
-        //_from, _to, _id = current_index
-        //next_to = None
-        //# Pick next road according to planned route
-        //if route:
-            //if route[0][:2] == current_index[:2]:  # We just finished the first step of the route, drop it.
-                //route.pop(0)
-            //if route and route[0][0] == _to:  # Next road in route is starting at the end of current road.
-                //_, next_to, _ = route[0]
-            //# elif route:
-                //# logger.warning("Route {} does not start after current road {}.".format(route[0], current_index))
+        :param current_index: the index of the current lane.
+        :param position: the vehicle position.
+        :return: the index of the next lane to be followed when current lane is finished.
+        */
 
-        //# pick closest next road
-        //if not next_to:
-            //try:
-                //# next_to = list(self.graph[_to].keys())[np.random.randint(len(self.graph[_to]))]
+        std::string _from;
+        std::string _to;
+        int _id;
+        std::tie(_from, _to, _id) = current_index;
 
-                //lane_candidates = []
-                //for next_to in list(self.graph[_to].keys()):
-                    //for l in range(len(self.graph[_to][next_to])):
-                        //lane_candidates.append((_to, next_to, l))
+        std::vector<LaneIndex> lane_candidates;
 
-                //next_lane = min(lane_candidates, key=lambda l: self.get_lane(l).distance(position))
-                //return next_lane
-            //except KeyError:
-                //return current_index
+        for ( const auto &[next_to, v]: this->graph[_to] ) {
+            for (int i; i < this->graph[_to][next_to].size(); i++ ){
+                lane_candidates.push_back(LaneIndex(_to, next_to, i));
+            }
+        }
+
+        return *std::min_element(lane_candidates.begin(), lane_candidates.end(),
+                    [this, position] (const LaneIndex l1, const LaneIndex l2) { return this->get_lane(l1)->distance(position) < this->get_lane(l2)->distance(position);}
+                );
+
+    }
+};
 
 #endif // ROAD_H
