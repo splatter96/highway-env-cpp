@@ -88,4 +88,10 @@ def _make_road() -> None:
     print(next_lane)
     print(net.get_lane(next_lane).start)
 
+    net.get_closest_lane_index(np.array([0,0]), 0.4)
+    net.get_closest_lane_index(np.array([0,0]), 0.4)
+    net.get_closest_lane_index(np.array([0,0]), 0.4)
+    dist = net.get_closest_lane_index(np.array([240,0]), 0.4)
+    print(dist)
+
 _make_road()

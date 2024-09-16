@@ -23,9 +23,10 @@ typedef std::tuple<std::string, std::string, int> LaneIndex;
 
 class RoadNetwork{
 public:
-    std::vector<LaneIndex> lane_indices;
-    std::vector<AbstractLane> lanes;
     std::map<std::string, std::map<std::string, std::vector<std::unique_ptr<AbstractLane>>>> graph;
+
+    std::vector<LaneIndex> lane_indices;
+    std::vector<std::unique_ptr<AbstractLane>> lanes;
 
     RoadNetwork(){ };
 
@@ -68,42 +69,42 @@ public:
     }
 
 
-    //def get_closest_lane_index(self, position: np.ndarray, heading: Optional[float] = None) -> LaneIndex:
-        //"""
-        //Get the index of the lane closest to a world position.
+    LaneIndex get_closest_lane_index(Vector position, float heading){
+        /*
+        Get the index of the lane closest to a world position.
 
-        //:param position: a world position [m].
-        //:param heading: a heading angle [rad].
-        //:return: the index of the closest lane.
-        //"""
+        :param position: a world position [m].
+        :param heading: a heading angle [rad].
+        :return: the index of the closest lane.
+        */
 
-        //if not self.lane_indices:
-            //for _from, to_dict in self.graph.items():
-                //for _to, lanes in to_dict.items():
-                    //for _id, l in enumerate(lanes):
-                        //self.lane_indices.append((_from, _to, _id))
-                        //self.lanes.append(self.get_lane((_from, _to, _id)))
+        if (this->lane_indices.size() == 0){
+            for ( const auto &[_from, to_dict]: this->graph ) {
+                for ( const auto &[_to, lanes]: to_dict ) {
+                    for (size_t i = 0; i < lanes.size(); i++){
+                        this->lane_indices.push_back(LaneIndex(_from, _to, i));
+                        this->lanes.push_back(this->get_lane(LaneIndex(_from, _to, i)));
+                    }
+                }
+            }
+        }
 
-        //cdef float current_smallest = 1e8
-        //cdef Tuple [str, str, int] closest_lane_index
-        //cdef float curr_dist
-        //cdef int i, l_len
-        //# cdef AbstractLane lane
-        //cdef object lane
 
-        //l_len = len(self.lane_indices)
+        float current_smallest = 1e8;
+        LaneIndex closest_lane_index;
 
-        //for i in range(l_len):
-            //index = self.lane_indices[i]
-            //lane = self.lanes[i]
-            //curr_dist = lane.distance_with_heading(position, heading)
-            //if  curr_dist < current_smallest:
-                //current_smallest = curr_dist
-                //closest_lane_index = index
+        for (size_t i = 0; i < this->lane_indices.size(); i++){
+            auto index = this->lane_indices[i];
+            std::unique_ptr<AbstractLane> &lane = this->lanes[i];
+            float curr_dist = lane->distance_with_heading(position, heading);
+            if(curr_dist < current_smallest){
+                current_smallest = curr_dist;
+                closest_lane_index = index;
+            }
+        }
 
-        //# print("Done \n\n")
-
-        //return closest_lane_index
+        return closest_lane_index;
+    }
 
     LaneIndex next_lane(LaneIndex current_index, Vector position){
         /*
@@ -122,7 +123,7 @@ public:
         std::vector<LaneIndex> lane_candidates;
 
         for ( const auto &[next_to, v]: this->graph[_to] ) {
-            for (int i; i < this->graph[_to][next_to].size(); i++ ){
+            for (size_t i = 0; i < this->graph[_to][next_to].size(); i++){
                 lane_candidates.push_back(LaneIndex(_to, next_to, i));
             }
         }
