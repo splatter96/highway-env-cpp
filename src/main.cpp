@@ -1,6 +1,7 @@
 
 #include "lane.h"
 #include "road.h"
+#include "kinematics.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
@@ -54,4 +55,7 @@ PYBIND11_MODULE(python_example, m)
         .def("get_closest_lane_index", &RoadNetwork::get_closest_lane_index)
         .def("next_lane", &RoadNetwork::next_lane)
         .def("side_lanes", &RoadNetwork::side_lanes);
+
+    //py::class_<Road>(m, "Road")
+        //.def(py::init<RoadNetwork>(), py::arg());
 }

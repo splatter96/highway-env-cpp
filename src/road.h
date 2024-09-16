@@ -12,6 +12,8 @@
 #include <math.h>
 #include <algorithm>
 
+//#include "kinematics.h"
+
 #include <Eigen/Dense>
 //#include <pybind11/eigen.h>
 //#include <pybind11/numpy.h>
@@ -27,6 +29,9 @@ public:
 
     std::vector<LaneIndex> lane_indices;
     std::vector<std::unique_ptr<AbstractLane>> lanes;
+
+    //std::vector<Vehicle> vehicles;
+    //std::vector<RoadObject> objects;
 
     RoadNetwork(){ };
 
@@ -152,6 +157,117 @@ public:
             lanes.push_back(LaneIndex(_from, _to, _id + 1));
         return lanes;
     }
+
+    //void act(){
+        //[>Decide the actions of each entity on the road.<]
+        //for (const auto &vehicle : this->vehicles)
+            //vehicle.act()
+    //}
+
 };
+
+
+/*
+class Road {
+public:
+    std::unique_ptr<RoadNetwork> network;
+    std::vector<Vehicle> vehicles;
+    std::vector<RoadObject> objects;
+
+    /*
+    New road
+
+    :param network: the road network describing the lanes
+    :param vehicles: the vehicles driving on the road
+    :param road_objects: the objects on the road including obstacles and landmarks
+    Road(RoadNetwork network){
+        //std::vector<Vehicle> vehicles,
+        //std::vector<RoadObject> road_objects) {
+
+        this->network = std::move(std::make_unique<RoadNetwork>(network));
+        //this->vehicles = vehicles;
+        //this->objects = road_objects;
+    }
+
+};
+*/
+
+/*
+class Road(object):
+    """A road is a set of lanes, and a set of vehicles driving on these lanes."""
+
+    def __init__(self,
+                 network: RoadNetwork = None,
+                 vehicles: List['kinematics.Vehicle'] = None,
+                 road_objects: List['objects.RoadObject'] = None,
+                 np_random: np.random.RandomState = None,
+                 record_history: bool = False) -> None:
+        """
+        New road.
+
+        :param network: the road network describing the lanes
+        :param vehicles: the vehicles driving on the road
+        :param road_objects: the objects on the road including obstacles and landmarks
+        :param np.random.RandomState np_random: a random number generator for vehicle behaviour
+        :param record_history: whether the recent trajectories of vehicles should be recorded for display
+        """
+        self.network = network
+        self.vehicles = vehicles or []
+        self.objects = road_objects or []
+        self.np_random = np_random if np_random else np.random.RandomState()
+        self.record_history = record_history
+
+    def close_vehicles_to(self, vehicle: 'kinematics.Vehicle', distance: float, count: int = None,
+                          see_behind: bool = True) -> object:
+
+        distance = distance**2 #need to square it, because hacky norm does not use sqrt
+        vehicles = [v for v in self.vehicles
+                    # if np.linalg.norm(v.position - vehicle.position) < distance
+                    if utils.norm(v.position, vehicle.position) < distance
+                    and v is not vehicle
+                    and (see_behind or -2 * vehicle.LENGTH < vehicle.lane_distance_to(v))]
+
+        vehicles = sorted(vehicles, key=lambda v: abs(vehicle.lane_distance_to(v)))
+        if count:
+            vehicles = vehicles[:count]
+        return vehicles
+
+    def act(self) -> None:
+        """Decide the actions of each entity on the road."""
+        # e.g., len(self.vehicles) = 7
+        # if vehicle: IDMVehicle, it will go to the behavior.py
+        # if vehicle: MDPVehicle, it will go to the behavior.py
+        for vehicle in self.vehicles:  # all the vehicles on the road
+            vehicle.act()
+
+    def step(self, dt) -> None:
+        """
+        Step the dynamics of each entity on the road.
+
+        :param dt: timestep [s]
+        """
+        vehicles = self.vehicles
+        objects = self.objects
+        cdef int i, j
+        cdef int len_v = len(vehicles)
+        cdef int len_o = len(objects)
+
+        for i in range(len_v):
+            vehicles[i].step(dt)
+        # for vehicle in self.vehicles:
+            # vehicle.step(dt)
+
+        for i in range(len_v):
+            v = vehicles[i]
+            for j in range(len_v):
+               v.check_collision(vehicles[j])
+            for j in range(len_o):
+                v.check_collision(objects[j])
+        # for vehicle in self.vehicles:
+            # for other in self.vehicles:
+                # vehicle.check_collision(other)
+            # for other in self.objects:
+                # vehicle.check_collision(other)
+*/
 
 #endif // ROAD_H
