@@ -56,6 +56,4 @@ PYBIND11_MODULE(python_example, m)
         .def("next_lane", &RoadNetwork::next_lane)
         .def("side_lanes", &RoadNetwork::side_lanes);
 
-    //py::class_<Road>(m, "Road")
-        //.def(py::init<RoadNetwork>(), py::arg());
 }

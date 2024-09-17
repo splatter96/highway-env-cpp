@@ -16,7 +16,7 @@ __version__ = "0.0.1"
 ext_modules = [
     Pybind11Extension(
         "python_example",
-        ["src/main.cpp"],
+        ["src/main.cpp", "src/road.cpp", "src/kinematics.cpp"],
         include_dirs=[
                 "/usr/include/eigen3",
         ],
